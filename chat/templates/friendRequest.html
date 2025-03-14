@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friend Requests</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.2/mdb.min.css" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- MDBootstrap JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.2/mdb.min.js"></script>
+    <style>
+        .background-radial-gradient {
+          background-color: hsl(218, 41%, 15%);
+          background-image: radial-gradient(650px circle at 0% 0%,
+              hsl(218, 41%, 35%) 15%,
+              hsl(218, 41%, 30%) 35%,
+              hsl(218, 41%, 20%) 75%,
+              hsl(218, 41%, 19%) 80%,
+              transparent 100%),
+            radial-gradient(1250px circle at 100% 100%,
+              hsl(218, 41%, 45%) 15%,
+              hsl(218, 41%, 30%) 35%,
+              hsl(218, 41%, 20%) 75%,
+              hsl(218, 41%, 19%) 80%,
+              transparent 100%);
+        }
+    
+        #radius-shape-1 {
+          height: 220px;
+          width: 220px;
+          top: 40px;
+          left: -130px;
+          background: radial-gradient(#44006b, #ad1fff);
+          overflow: hidden;
+        }
+    
+        #radius-shape-2 {
+          border-radius: 38% 62% 63% 37% / 70% 33% 67% 30%;
+          bottom: -60px;
+          right: -110px;
+          width: 300px;
+          height: 300px;
+          background: radial-gradient(#44006b, #ad1fff);
+          overflow: hidden;
+        }
+    
+        .bg-glass {
+          background-color: hsla(0, 0%, 100%, 0.9) !important;
+          backdrop-filter: saturate(200%) blur(25px);
+        }
+
+        /* Centered Friend Requests Box */
+        .request-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            text-align: center;
+        }
+        .request-item:last-child {
+            border-bottom: none;
+        }
+        .request-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .btn-group .btn {
+            padding: 10px 20px;
+            border-radius: 0;
+        }
+
+        .btn-group .active {
+            background-color: #007bff;
+            color: white;
+        }
+        h4{
+            color: white;
+        }
+      </style>
+</head>
+<body class="background-radial-gradient vh-100">
+
+    <nav class="navbar navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand">Chat Application</a>
+            <ul class="navbar-nav d-flex flex-row gap-4">
+                <li class="nav-item">
+                    <a class="nav-link" href="/chat/">Chat</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="friends-tab" onclick="loadFriendRequests()">Friend Requests</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/searchUser">Search</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Profile</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+   
+
+        <section class="container d-flex flex-column align-items-center" style="min-height: 100vh;">
+            <div class="btn-group mt-4" role="group">
+                <button id="show-friends" class="btn btn-outline-primary active" onclick="toggleView('friends')">FRIENDS</button>
+                <button id="show-requests" class="btn btn-outline-secondary" onclick="toggleView('requests')">FRIEND REQUESTS</button>
+            </div>
+
+            <div id="friends-section" class="mt-4 w-100">
+                <h4>Your Friends</h4>
+                <div id="friends-list">
+                    
+                </div>
+            </div>
+
+            <div id="requests-section" class="mt-4 w-100" style="display: none;">
+                <h4>Friend Requests</h4>
+                <div id="friend-requests"></div>
+            </div>
+        </section>
+
+</body>
+    <script>
+        function toggleView(section) {
+                if (section === 'friends') {
+                    document.getElementById('friends-section').style.display = 'block';
+                    document.getElementById('requests-section').style.display = 'none';
+                    document.getElementById('show-friends').classList.add('active');
+                    document.getElementById('show-requests').classList.remove('active');
+                    loadFriends();
+                } else {
+                    document.getElementById('friends-section').style.display = 'none';
+                    document.getElementById('requests-section').style.display = 'block';
+                    document.getElementById('show-friends').classList.remove('active');
+                    document.getElementById('show-requests').classList.add('active');
+                    loadRequests();
+                }
+            }
+
+
+            document.addEventListener("DOMContentLoaded", function () {
+                loadFriends(); // Load friends list by default
+            });
+    
+            function loadFriends() {
+                fetch('/get_friends/')
+                    .then(response => response.json())
+                    .then(data => {
+                        let friendList = document.getElementById("friends-section");
+                        friendList.innerHTML = '<h4>Your Friends</h4>';
+                        data.friends.forEach(friend => {
+                            friendList.innerHTML += `<div class="request-item">
+                                <span>${friend.name}</span>
+                            </div>`;
+                        });
+                    })
+                    .catch(error => console.error("Error fetching friends:", error));
+            }
+    
+            function loadRequests() {
+                fetch('/get_friend_requests/')
+                    .then(response => response.json())
+                    .then(data => {
+                        let requestList = document.getElementById("friend-requests");
+                        requestList.innerHTML = '';
+                        data.forEach(request => {
+                            requestList.innerHTML += `<div class="request-item">
+                                <span>${request.name}</span>
+                                <div>
+                                    <button class="btn btn-success btn-sm" onclick="handleRequest(${request.id}, 'accept')">ACCEPT</button>
+                                    <button class="btn btn-danger btn-sm" onclick="handleRequest(${request.id}, 'reject')">REJECT</button>
+                                </div>
+                            </div>`;
+                        });
+                    })
+                    .catch(error => console.error("Error fetching friend requests:", error));
+            }
+    
+            function handleRequest(requestId, action) {
+                fetch(`/handle_request/${requestId}/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: action })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Action successful!");
+                        loadRequests(); // Refresh the list
+                    } else {
+                        alert("Action failed!");
+                    }
+                })
+                .catch(error => console.error("Error processing request:", error));
+            }
+    
+            loadRequests();
+    </script>
+</html>
