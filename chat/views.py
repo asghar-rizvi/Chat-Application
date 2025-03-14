@@ -74,7 +74,14 @@ def network(request):
 
 @login_required
 def searchUser(request):
-    users = User.objects.all()[:15] 
+    excluded_users = FriendRequest.objects.filter(
+        sender=request.user, status__in=["accepted", "pending"]
+    ).values_list("receiver", flat=True)
+
+    # Fetch users excluding self and those in `excluded_users`
+    users = User.objects.exclude(username=request.user.username).exclude(id__in=excluded_users)
+
+
 
     users_list = []
     for user in users:
@@ -90,10 +97,7 @@ def searchUser(request):
 
 @login_required
 def searchUserByName(request):
-    print('Inside search user by name....')
     query = request.GET.get('q', '') 
-    print("Search Query:", query)
-
     if query:  
         users = User.objects.filter(username__icontains=query)[:10] 
     else:
@@ -109,7 +113,6 @@ def searchUserByName(request):
             'request_sent': request_sent
         })
     
-    print('Returning JSON Response:', users_list)
     return JsonResponse(users_list, safe=False) 
     
     
@@ -118,17 +121,22 @@ def send_friend_request(request, username):
     if request.method == "POST":
         receiver = get_object_or_404(User, username=username)
         sender = request.user
-        print('Sender...', sender)
-        print('Reciever...', receiver)
+        print(sender)
+        print(receiver)
+        
+        print(f"Sender: {sender.username} (ID: {sender.id})")
+        print(f"Receiver: {receiver.username} (ID: {receiver.id})")
         
         # Check if request already exists
-        # if FriendRequest.objects.filter(sender=sender, receiver=receiver).exists():
-        #     return JsonResponse({"message": "Friend request already sent!", "status": "warning"})
+        if FriendRequest.objects.filter(sender=sender, receiver=receiver).exists():
+            print('Already Exists')
+            return JsonResponse({"message": "Friend request already sent!", "status": "warning"})
 
-        # # Save new friend request
-        # FriendRequest.objects.create(sender=sender, receiver=receiver)
-        # return JsonResponse({"message": "Friend request sent!", "status": "success"})
+        # Save new friend request
+        FriendRequest.objects.create(sender=sender, receiver=receiver)
+        print("Request being Send")
         return JsonResponse({"message": "Friend request sent!", "status": "success"})
+    
 
     return JsonResponse({"message": "Invalid request!", "status": "error"})
     
