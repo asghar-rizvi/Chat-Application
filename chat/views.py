@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from .models import *
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-
+import json
 
 def signup(request):
     if request.method == "POST":
@@ -172,23 +172,34 @@ def get_friend_requests(request):
 @login_required
 def handle_request(request, request_id):
     """Handles accepting or rejecting friend requests."""
+    print('before if....')
+
     if request.method == "POST":
-        action = request.POST.get("action")
-        friend_request = get_object_or_404(FriendRequest, id=request_id, receiver=request.user)
-        
-        if action == "accept":
-            # Create a friendship record
-            Friendship.objects.create(user1=friend_request.sender, user2=request.user)
-            friend_request.status = "accepted"
-            friend_request.save()
-            return JsonResponse({"success": True, "message": "Friend request accepted!"})
+        try:
+            data = json.loads(request.body)  
+            action = data.get("action")  
+            print('Received action:', action)
 
-        elif action == "reject":
-            friend_request.status = "rejected"
-            friend_request.save()
-            return JsonResponse({"success": True, "message": "Friend request rejected!"})
+            if not action:
+                return JsonResponse({"success": False, "message": "Action missing"}, status=400)
 
-    return JsonResponse({"success": False, "message": "Invalid request"})
+            friend_request = get_object_or_404(FriendRequest, id=request_id, receiver=request.user)
+
+            if action == "accept":
+                Friendship.objects.create(user1=friend_request.sender, user2=request.user)
+                friend_request.status = "accepted"
+                friend_request.save()
+                return JsonResponse({"success": True, "message": "Friend request accepted!"})
+
+            elif action == "reject":
+                friend_request.status = "rejected"
+                friend_request.save()
+                return JsonResponse({"success": True, "message": "Friend request rejected!"})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "message": "Invalid JSON"}, status=400)
+
+    return JsonResponse({"success": False, "message": "Invalid request"}, status=400)
     
 
 @login_required
@@ -204,6 +215,11 @@ def handle_request2(request, request_id):
             Friendship.objects.create(user1=friend_request.sender, user2=request.user)
             friend_request.status = "accepted"
             friend_request.save()
+            groupname = friend_request.sender.username + '_' +request.user.username
+            print(groupname)
+            Group.objects.create(
+                group_name = groupname
+            )
             return JsonResponse({"success": True, "message": "Friend request accepted!"})
 
         elif action == "reject":
@@ -212,3 +228,22 @@ def handle_request2(request, request_id):
             return JsonResponse({"success": True, "message": "Friend request rejected!"})
 
     return JsonResponse({"success": False, "message": "Invalid request"})
+
+
+
+@login_required
+def chat_view(request):
+    return render(request, "chat.html")
+
+@login_required
+def get_friends(request):
+    friends = Friendship.objects.filter(user1=request.user) | Friendship.objects.filter(user2=request.user)
+    friend_list = [
+        {"id": f.user2.id if f.user1 == request.user else f.user1.id, "name": f.user2.username if f.user1 == request.user else f.user1.username}
+        for f in friends
+    ]
+    print(friend_list)
+    return JsonResponse(friend_list, safe=False)
+
+
+
