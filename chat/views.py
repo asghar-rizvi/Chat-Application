@@ -215,8 +215,11 @@ def handle_request2(request, request_id):
             Friendship.objects.create(user1=friend_request.sender, user2=request.user)
             friend_request.status = "accepted"
             friend_request.save()
-            groupname = friend_request.sender.username + '_' +request.user.username
-            print(groupname)
+            
+            user1, user2 = sorted([friend_request.sender, request.user], key=lambda x: x.username)
+            groupname = user1.username + '_' + user2.username
+            
+            Group.objects.create(group_name=groupname, user1=user1, user2=user2)
             Group.objects.create(
                 group_name = groupname
             )
@@ -244,6 +247,18 @@ def get_friends(request):
     ]
     print(friend_list)
     return JsonResponse(friend_list, safe=False)
+
+@login_required
+def get_group_name(request, friend_username):
+    try:
+        friend = User.objects.get(username=friend_username)
+        user1, user2 = sorted([request.user, friend], key=lambda x: x.username)
+        group = Group.objects.get(user1=user1, user2=user2)
+        return JsonResponse({"group_name": group.group_name})
+    except Group.DoesNotExist:
+        return JsonResponse({"error": "Group not found"}, status=404)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=404)
 
 
 

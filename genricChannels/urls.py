@@ -15,6 +15,8 @@ urlpatterns = [
     path("get_friends/", get_friends, name="get_friends"),
     path("get_friend_requests/", get_friend_requests, name="get_friend_requests"),
     path("handle_request/<int:request_id>/", handle_request, name="handle_request"),
+    
+    path("get_group_name/", get_group_name, name="get_group_name"),
 
     path('network/',network , name ='network'),
     
