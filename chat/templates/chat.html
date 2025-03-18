@@ -158,11 +158,8 @@
     </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        loadFriendsList();
-    
-        document.getElementById("send-button").addEventListener("click", sendMessage);
-    });
+    document.addEventListener("DOMContentLoaded", function () {
+        loadFriendsList();});
     
     function loadFriendsList() {
         fetch('/get_friends/')
@@ -171,55 +168,66 @@
                 let friendsList = document.getElementById("friends-list");
                 friendsList.innerHTML = "";
                 data.forEach(friend => {
-                    let friendItem = `<div class="friend-item" onclick="loadChat(${friend.id}, '${friend.name}')">${friend.name}</div>`;
+                    let friendItem = `<div class="friend-item" onclick="fetchGroupName('${friend.username}')">${friend.name}</div>`;
                     friendsList.innerHTML += friendItem;
                 });
             })
             .catch(error => console.error("Error loading friends:", error));
     }
     
-    function loadChat(friendId, friendName) {
-        document.getElementById("chat-username").textContent = friendName;
-    
-        fetch(`/get_chat_messages/${friendId}/`)
+    function fetchGroupName(friendUsername) {
+        fetch(`/get_group_name/${friendUsername}/`)
             .then(response => response.json())
             .then(data => {
-                let chatMessages = document.getElementById("chat-messages");
-                chatMessages.innerHTML = "";
-                data.forEach(msg => {
-                    let msgClass = msg.sender === "{{ user.username }}" ? "sent" : "received";
-                    chatMessages.innerHTML += `<div class="message ${msgClass}">${msg.content}</div>`;
-                });
+                if (data.group_name) {
+                    startWebSocket(data.group_name, friendUsername);
+                } else {
+                    console.error("Error fetching group name:", data.error);
+                }
             })
-            .catch(error => console.error("Error loading chat:", error));
+            .catch(error => console.error("Error fetching group name:", error));
     }
     
-    function sendMessage() {
-        let messageInput = document.getElementById("message-input");
-        let message = messageInput.value;
-        let friendId = document.getElementById("chat-username").dataset.friendId;
+    function startWebSocket(groupName, friendUsername) {
+        document.getElementById("chat-username").innerText = friendUsername;
     
-        if (message.trim() === "") return;
+        const chatBox = document.getElementById("chat-box");
+        chatBox.innerHTML = "";  // Clear previous messages
     
-        fetch(`/send_message/${friendId}/`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
-            body: JSON.stringify({ message: message })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById("chat-messages").innerHTML += `<div class="message sent">${message}</div>`;
+        const wsUrl = `ws://${window.location.host}/ws/chat/${groupName}/`;
+        const chatSocket = new WebSocket(wsUrl);
+    
+        chatSocket.onopen = function () {
+            console.log("WebSocket connected for group:", groupName);
+        };
+    
+        chatSocket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+            appendMessage(data.user, data.message);
+        };
+    
+        chatSocket.onclose = function () {
+            console.log("WebSocket disconnected.");
+        };
+    
+        document.getElementById("send-button").onclick = function () {
+            let messageInput = document.getElementById("message-input");
+            let message = messageInput.value.trim();
+    
+            if (message !== "") {
+                chatSocket.send(JSON.stringify({ message: message }));
+                appendMessage("You", message);
                 messageInput.value = "";
             }
-        })
-        .catch(error => console.error("Error sending message:", error));
+        };
+    
+        function appendMessage(user, message) {
+            let msgElement = document.createElement("div");
+            msgElement.classList.add(user === "You" ? "message-sent" : "message-received");
+            msgElement.innerHTML = `<strong>${user}:</strong> ${message}`;
+            chatBox.appendChild(msgElement);
+        }
     }
-
-
 </script>
 
 </body>
