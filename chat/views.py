@@ -200,38 +200,6 @@ def handle_request(request, request_id):
     return JsonResponse({"success": False, "message": "Invalid request"}, status=400)
     
 
-# @login_required
-# def handle_request2(request, request_id):
-#     """Handles accepting or rejecting friend requests Changes being done in the new function
-#         might delete this later ."""
-#     if request.method == "POST":
-#         action = request.POST.get("action")
-#         friend_request = get_object_or_404(FriendRequest, id=request_id, receiver=request.user)
-        
-#         if action == "accept":
-#             # Create a friendship record
-#             Friendship.objects.create(user1=friend_request.sender, user2=request.user)
-#             friend_request.status = "accepted"
-#             friend_request.save()
-            
-#             user1, user2 = sorted([friend_request.sender, request.user], key=lambda x: x.username)
-#             groupname = user1.username + '_' + user2.username
-            
-#             Group.objects.create(group_name=groupname, user1=user1, user2=user2)
-#             Group.objects.create(
-#                 group_name = groupname
-#             )
-#             return JsonResponse({"success": True, "message": "Friend request accepted!"})
-
-#         elif action == "reject":
-#             friend_request.status = "rejected"
-#             friend_request.save()
-#             return JsonResponse({"success": True, "message": "Friend request rejected!"})
-
-#     return JsonResponse({"success": False, "message": "Invalid request"})
-
-
-
 @login_required
 def chat_view(request):
     return render(request, "chat.html")

@@ -223,16 +223,23 @@
             //appendMessage(data.user, data.message);
 
             if (data.type === 'chat_history') {
-                chatMessages.innerHTML = ""; 
+                chatMesssages.innerHTML = ""; 
                 data.messages.forEach(msg => {
-                    console.log(msg)
+                    console.log('inside chat_history:', msg);  // Debugging: Check the structure of msg
+            
+                    let msgElement = document.createElement("div");
+            
+                    // Extract user and message properly
+                    msgElement.innerHTML = `${msg.message}`; 
+                    
+                    chatMesssages.appendChild(msgElement);
                 });
-            } else if (data.type === 'chat_message') {
-                // ✅ Handle incoming chat message
-                appendMessage(
+            }
+            else if (data.type === 'chat_message') {
+               /* appendMessage(
                     data.username === currentUser ? "You" : data.username,
                     data.message
-                );
+                );*/
             }
     
         };
