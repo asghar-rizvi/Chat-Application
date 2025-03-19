@@ -69,7 +69,8 @@ def chat(request):
 
 @login_required
 def network(request):
-    return render(request,'friendRequest.html')
+    user = request.user
+    return render(request,'friendRequest.html', {user:user})
 
 
 @login_required
