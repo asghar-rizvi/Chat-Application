@@ -121,11 +121,6 @@ def send_friend_request(request, username):
     if request.method == "POST":
         receiver = get_object_or_404(User, username=username)
         sender = request.user
-        print(sender)
-        print(receiver)
-        
-        print(f"Sender: {sender.username} (ID: {sender.id})")
-        print(f"Receiver: {receiver.username} (ID: {receiver.id})")
         
         # Check if request already exists
         if FriendRequest.objects.filter(sender=sender, receiver=receiver).exists():
@@ -172,14 +167,12 @@ def get_friend_requests(request):
 @login_required
 def handle_request(request, request_id):
     """Handles accepting or rejecting friend requests."""
-    print('before if....')
 
     if request.method == "POST":
         try:
             data = json.loads(request.body)  
             action = data.get("action")  
-            print('Received action:', action)
-
+            print(action)
             if not action:
                 return JsonResponse({"success": False, "message": "Action missing"}, status=400)
 
@@ -189,6 +182,11 @@ def handle_request(request, request_id):
                 Friendship.objects.create(user1=friend_request.sender, user2=request.user)
                 friend_request.status = "accepted"
                 friend_request.save()
+                
+                user1, user2 = sorted([friend_request.sender, request.user], key=lambda x: x.username)
+                groupname = user1.username + '_' + user2.username
+                print(groupname)
+                Group.objects.create(group_name=groupname, user1=user1, user2=user2)
                 return JsonResponse({"success": True, "message": "Friend request accepted!"})
 
             elif action == "reject":
@@ -202,35 +200,35 @@ def handle_request(request, request_id):
     return JsonResponse({"success": False, "message": "Invalid request"}, status=400)
     
 
-@login_required
-def handle_request2(request, request_id):
-    """Handles accepting or rejecting friend requests Changes being done in the new function
-        might delete this later ."""
-    if request.method == "POST":
-        action = request.POST.get("action")
-        friend_request = get_object_or_404(FriendRequest, id=request_id, receiver=request.user)
+# @login_required
+# def handle_request2(request, request_id):
+#     """Handles accepting or rejecting friend requests Changes being done in the new function
+#         might delete this later ."""
+#     if request.method == "POST":
+#         action = request.POST.get("action")
+#         friend_request = get_object_or_404(FriendRequest, id=request_id, receiver=request.user)
         
-        if action == "accept":
-            # Create a friendship record
-            Friendship.objects.create(user1=friend_request.sender, user2=request.user)
-            friend_request.status = "accepted"
-            friend_request.save()
+#         if action == "accept":
+#             # Create a friendship record
+#             Friendship.objects.create(user1=friend_request.sender, user2=request.user)
+#             friend_request.status = "accepted"
+#             friend_request.save()
             
-            user1, user2 = sorted([friend_request.sender, request.user], key=lambda x: x.username)
-            groupname = user1.username + '_' + user2.username
+#             user1, user2 = sorted([friend_request.sender, request.user], key=lambda x: x.username)
+#             groupname = user1.username + '_' + user2.username
             
-            Group.objects.create(group_name=groupname, user1=user1, user2=user2)
-            Group.objects.create(
-                group_name = groupname
-            )
-            return JsonResponse({"success": True, "message": "Friend request accepted!"})
+#             Group.objects.create(group_name=groupname, user1=user1, user2=user2)
+#             Group.objects.create(
+#                 group_name = groupname
+#             )
+#             return JsonResponse({"success": True, "message": "Friend request accepted!"})
 
-        elif action == "reject":
-            friend_request.status = "rejected"
-            friend_request.save()
-            return JsonResponse({"success": True, "message": "Friend request rejected!"})
+#         elif action == "reject":
+#             friend_request.status = "rejected"
+#             friend_request.save()
+#             return JsonResponse({"success": True, "message": "Friend request rejected!"})
 
-    return JsonResponse({"success": False, "message": "Invalid request"})
+#     return JsonResponse({"success": False, "message": "Invalid request"})
 
 
 
@@ -245,7 +243,6 @@ def get_friends(request):
         {"id": f.user2.id if f.user1 == request.user else f.user1.id, "name": f.user2.username if f.user1 == request.user else f.user1.username}
         for f in friends
     ]
-    print(friend_list)
     return JsonResponse(friend_list, safe=False)
 
 @login_required
@@ -254,6 +251,7 @@ def get_group_name(request, friend_username):
         friend = User.objects.get(username=friend_username)
         user1, user2 = sorted([request.user, friend], key=lambda x: x.username)
         group = Group.objects.get(user1=user1, user2=user2)
+        print(group)
         return JsonResponse({"group_name": group.group_name})
     except Group.DoesNotExist:
         return JsonResponse({"error": "Group not found"}, status=404)

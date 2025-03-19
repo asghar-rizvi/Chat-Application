@@ -11,13 +11,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Add user to the WebSocket group
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
-        
+        print('GroupName',self.group_name)
         # Load previous chat messages
         chat_history = await self.get_chat_history(self.group_name)
-        await self.send(text_data=json.dumps({
-            'type': 'chat_history',
-            'messages': chat_history
-        }))
+        print('Chat History...', chat_history)
+        if chat_history:
+            await self.send(text_data=json.dumps({
+                'type': 'chat_history',
+                'messages': chat_history
+            }))
+        else:
+            print('No chat history')
     
     async def receive(self, text_data=None, bytes_data=None):
         if self.scope['user'].is_authenticated:
@@ -25,6 +29,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             message = data['message']
             username = self.scope['user'].username
             
+            print('Message Coming To Server...', message)
+            print('Sender...', username)
+            
+            print('Adding Records into database')
             # Save message to the database
             group_obj = await self.get_group(self.group_name)
             await self.create_chat_message(username, message, group_obj)
