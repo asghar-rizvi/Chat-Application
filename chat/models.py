@@ -38,7 +38,11 @@ class Group(models.Model):
 
 
 class ChatMessage(models.Model):
-    message_chats = models.TextField() 
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    group_name = models.CharField(max_length=255) 
+    message_data = models.JSONField()  # Storing {'user': username, 'message': message}
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.message_data['user']}: {self.message_data['message']}"
     
     
