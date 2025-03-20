@@ -222,29 +222,30 @@
         
             chatSocket.onmessage = function (event) {
                 const data = JSON.parse(event.data);
-                console.log('Inside On message')
-                console.log(data.type)
+                console.log('Inside On message:', data.type);
+            
                 if (data.type === 'chat_history') {
+                    // Clear previous messages
                     chatMesssages.innerHTML = ""; 
+            
+                    // Loop through the chat history and display messages
                     data.messages.forEach(msg => {
-                        console.log('inside chat_history:', msg);  
+                        console.log('Inside chat_history:', msg);  
                         let msgElement = document.createElement("div");
-                        msgElement.innerHTML = `${msg.message}`; 
+                        msgElement.innerHTML = `<strong>${msg.user}:</strong> ${msg.message}`; 
                         chatMesssages.appendChild(msgElement);
                     });
-                }
-                else if (data.type === 'chat_message') {
-                    console.log('Recieving message')
-                    console.log(data)
-                    console.log('Message...',data.message)
-                
+            
+                } else if (data.type === 'chat_message') {
+                    console.log('Receiving message:', data);
+            
                     let msgElement = document.createElement("div");
-                    msgElement.innerHTML = `<strong>${data.user}:</strong> ${data.message.replace(`${data.user}:`, "").trim()}`;
+                    msgElement.innerHTML = `<strong>${data.user}:</strong> ${data.message}`;  
                     chatMesssages.appendChild(msgElement);
                     chatMesssages.scrollTop = chatMesssages.scrollHeight;
                 }
-        
             };
+            
         
             chatSocket.onclose = function () {
                 console.log("WebSocket disconnected.");
