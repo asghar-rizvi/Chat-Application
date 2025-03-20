@@ -64,13 +64,13 @@ def login_view(request):
 
 @login_required
 def chat(request):
-    return render(request, 'chat.html')
+    user = request.user.username
+    return render(request, 'chat.html', {'user':user})
 
 
 @login_required
 def network(request):
-    user = request.user
-    return render(request,'friendRequest.html', {user:user})
+    return render(request,'friendRequest.html')
 
 
 @login_required

@@ -38,6 +38,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.create_chat_message(username, message, group_obj)
             
             # Broadcast message to group
+            print('Sending message to group')
             await self.channel_layer.group_send(
                 self.group_name,
                 {
@@ -54,6 +55,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     async def chat_message(self, event):
         await self.send(text_data=json.dumps({
+            'type' : 'chat_message',
             'message': event['message'],
             'user': event['user']
         }))

@@ -156,15 +156,15 @@
                 </div>
             </div>
         </div>
+
     {{user|json_script:"user-id"}}
 
     </body>
     <script>
-        group_name = JSON.parse(document.getElementById('group-id').textContent)
-
+    
         document.addEventListener("DOMContentLoaded", function () {
             loadFriendsList();});
-        
+            user_name = JSON.parse(document.getElementById('user-id').textContent)
         function loadFriendsList() {
             fetch('/get_friends/')
                 .then(response => response.json())
@@ -221,30 +221,27 @@
             };
         
             chatSocket.onmessage = function (event) {
-                console.log('On message...', event)
                 const data = JSON.parse(event.data);
-                console.log('Before Sending to append message...', data)
-                //appendMessage(data.user, data.message);
-
+                console.log('Inside On message')
+                console.log(data.type)
                 if (data.type === 'chat_history') {
                     chatMesssages.innerHTML = ""; 
                     data.messages.forEach(msg => {
-                        console.log('inside chat_history:', msg);  // Debugging: Check the structure of msg
-                
+                        console.log('inside chat_history:', msg);  
                         let msgElement = document.createElement("div");
-                
-                        // Extract user and message properly
                         msgElement.innerHTML = `${msg.message}`; 
-                        
                         chatMesssages.appendChild(msgElement);
                     });
                 }
                 else if (data.type === 'chat_message') {
-                    data.messages.forEach(msg => {            
-                        let msgElement = document.createElement("div");
-                        msgElement.innerHTML = `${msg.message}`; 
-                        chatMesssages.appendChild(msgElement);
-                    });
+                    console.log('Recieving message')
+                    console.log(data)
+                    console.log('Message...',data.message)
+                
+                    let msgElement = document.createElement("div");
+                    msgElement.innerHTML = `<strong>${data.user}:</strong> ${data.message.replace(`${data.user}:`, "").trim()}`;
+                    chatMesssages.appendChild(msgElement);
+                    chatMesssages.scrollTop = chatMesssages.scrollHeight;
                 }
         
             };
@@ -258,18 +255,16 @@
         
                 if (message !== "") {
                     chatSocket.send(JSON.stringify({ message: message }));
-                    
-                    appendMessage("You", message);
                     messageInput.value = "";
                 }
             };
         
             function appendMessage(user, message) {
                 let msgElement = document.createElement("div");
-                msgElement.classList.add(user === "You" ? "message-sent" : "message-received");
-                msgElement.innerHTML = `<strong>${user}:</strong> ${message}`;
-                chatMesssages.appendChild(msgElement); 
-                chatMesssages.scrollTop = chatMesssages.scrollHeight;  
+                msgElement.classList.add("message"); 
+                msgElement.innerHTML = `${user}: ${message}`;
+                chatMesssages.appendChild(msgElement);
+                chatMesssages.scrollTop = chatMesssages.scrollHeight;
             }
         }
         
