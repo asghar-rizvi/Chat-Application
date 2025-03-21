@@ -38,7 +38,7 @@ class Group(models.Model):
 
 
 class ChatMessage(models.Model):
-    group_name = models.CharField(max_length=255) 
+    group_name = models.ForeignKey(Group, on_delete =models.CASCADE, related_name='group')
     message_data = models.JSONField()  # Storing {'user': username, 'message': message}
     timestamp = models.DateTimeField(auto_now_add=True)
 

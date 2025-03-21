@@ -97,9 +97,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         print('Group Name:', self.group_name)
-
+        print('Gettign History')
+        print('\n\n\n\n')
+        
         # Load previous chat messages
         chat_history = await self.get_chat_history(self.group_name)
+        
+        print('\n\n\n\n')
         print('Chat History:', chat_history)
 
         if chat_history:
@@ -166,6 +170,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def get_chat_history(self, group_name):
         """Retrieve chat history formatted as a list of dictionaries."""
         group = Group.objects.filter(group_name=group_name).first()
+        print('Getting History in function')
         if group:
             return [
                 {'user': msg.message_chats['user'], 'message': msg.message_chats['message']}
