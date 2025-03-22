@@ -20,6 +20,7 @@ urlpatterns = [
     path("get_group_name/<str:friend_username>/", get_group_name, name="get_group_name"),
 
     path('network/',network , name ='network'),
+    path('logout/',logout_user , name ='logout'),
     
     path('admin/', admin.site.urls),
 ]

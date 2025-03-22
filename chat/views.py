@@ -259,3 +259,7 @@ def profile_page(request):
             })  # ✅ Send error message in JSON response
 
     return render(request, "profile.html", {"user": request.user})
+
+def logout_user(request):
+    logout(request)  
+    return redirect('login') 
