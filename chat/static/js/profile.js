@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
         try {
-            const response = await fetch("{% url 'chat' %}", {
+            const response = await fetch(chatUrl, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -34,13 +34,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
                 body: JSON.stringify(formData)
             });
-
+        
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new Error("Unexpected response format. HTML received instead of JSON.");
+            }
+        
             const data = await response.json();
+        
             if (data.status === "success") { 
-                updateButton.disabled = true;
-                updateButton.classList.remove("active");
                 location.reload();
-
             } else {
                 alert("Error: " + data.message);
             }

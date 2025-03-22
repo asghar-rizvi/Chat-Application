@@ -11,63 +11,68 @@ from django.db.models import Q
 
 
 def signup(request):
-    if request.method == "POST":
-        data = request.POST
-        first_name = data.get('first_name')
-        last_name = data.get('last_name')
-        username = data.get('username')
-        email = data.get('email')
-        password = data.get('password')
+    if request.user.is_authenticated:
+        return redirect('chat')
+    else :
+        if request.method == "POST":
+            data = request.POST
+            first_name = data.get('first_name')
+            last_name = data.get('last_name')
+            username = data.get('username')
+            email = data.get('email')
+            password = data.get('password')
 
-        if User.objects.filter(username=username).exists():
-            messages.error(request, 'Account with this username already exists')
-            return redirect('register')
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'Account with this username already exists')
+                return redirect('register')
 
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'Account with this email already exists')
-            return redirect('register')
+            if User.objects.filter(email=email).exists():
+                messages.error(request, 'Account with this email already exists')
+                return redirect('register')
 
-        user = User.objects.create_user(
-            first_name=first_name,
-            last_name=last_name,
-            username=username,
-            email=email,
-            password=password  
-        )
+            user = User.objects.create_user(
+                first_name=first_name,
+                last_name=last_name,
+                username=username,
+                email=email,
+                password=password  
+            )
 
-        messages.success(request, 'Account created successfully! Please log in.')
-        return redirect('login')
+            messages.success(request, 'Account created successfully! Please log in.')
+            return redirect('login')
 
-    return render(request, 'register.html')
+        return render(request, 'register.html')
 
 
 
 def login_view(request):
-    if request.method == "POST":
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+    if request.user.is_authenticated:
+        return redirect('chat')
+    else:
+        if request.method == "POST":
+            email = request.POST.get('email')
+            password = request.POST.get('password')
 
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            messages.error(request, 'No account exists with this email.')
-            return redirect('register')
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                messages.error(request, 'No account exists with this email.')
+                return redirect('register')
 
-        user = authenticate(username=user.username, password=password)
-        
-        if user is not None:
-            login(request, user)
-            return redirect('chat')
-        else:
-            messages.error(request, 'Email or password is incorrect.')
-            return redirect('login')
-    return render(request, 'login.html')
+            user = authenticate(username=user.username, password=password)
+            
+            if user is not None:
+                login(request, user)
+                return redirect('chat')
+            else:
+                messages.error(request, 'Email or password is incorrect.')
+                return redirect('login')
+        return render(request, 'login.html')
 
 
 @login_required
 def chat(request):
-    user = request.user.username
-    return render(request, 'chat.html', {'user':user})
+    return render(request, 'chat.html')
 
 
 @login_required
@@ -99,11 +104,11 @@ def searchUser(request):
 
 @login_required
 def searchUserByName(request):
-    query = request.GET.get('q', '').strip()  # Trim whitespace
+    query = request.GET.get('q', '').strip()  #
     if query:
         users = User.objects.filter(username__icontains=query).exclude(id=request.user.id)[:10]
     else:
-        return JsonResponse({'error': 'No user found'}, status=400)  # Proper error response
+        return JsonResponse({'error': 'No user found'}, status=400)  
     
     users_list = []
     for user in users:
@@ -257,8 +262,11 @@ def get_group_name(request, friend_username):
 @login_required
 def profile_page(request):
     if request.method == "POST":
+        print('hehe')
+        print(request.body)
+
         try:
-            data = json.loads(request.body)  # Parse JSON data
+            data = json.loads(request.body)  
             request.user.first_name = data.get("first_name", request.user.first_name)
             request.user.last_name = data.get("last_name", request.user.last_name)
             request.user.email = data.get("email", request.user.email)
@@ -266,21 +274,21 @@ def profile_page(request):
                 request.user.set_password(data["password"])
             request.user.save()
 
-            messages.success(request, "Profile updated successfully!")  # Success message
-
+            messages.success(request, "Profile updated successfully!")  
+            print('Data')
             return JsonResponse({
                 "message": "Profile updated successfully!",
                 "status": "success",
                 "message_type": "success"
-            })  # ✅ Send message in JSON response
+            })  
 
         except Exception as e:
-            messages.error(request, "Error updating profile!")  # Error message
+            messages.error(request, "Error updating profile!") 
             return JsonResponse({
                 "message": "Error updating profile!",
                 "status": "error",
                 "message_type": "error"
-            })  # ✅ Send error message in JSON response
+            }) 
 
     return render(request, "profile.html", {"user": request.user})
 
