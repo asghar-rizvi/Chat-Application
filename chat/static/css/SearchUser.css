@@ -13,3 +13,22 @@
         hsl(218, 41%, 19%) 80%,
         transparent 100%);
   }
+
+.search-bar {
+    max-width: 400px;
+    border-radius: 50px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.search-bar input {
+    border-radius: 50px;
+    padding: 12px 15px;
+    font-size: 16px;
+}
+.search-bar input:focus {
+    box-shadow: none;
+    border: none;
+}
+.input-group-text {
+    border-radius: 50px 0 0 50px;
+}

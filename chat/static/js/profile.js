@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("updateForm");
     const inputs = form.querySelectorAll("input");
     const updateButton = document.querySelector(".btn-update");
+    const loadingSpinner = document.getElementById("loadingSpinner");
+    const btnText = document.querySelector(".btn-text");
 
     // Enable Update button on input change
     inputs.forEach(input => {
@@ -11,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Handle form submission using Fetch API
+    // Handle form submission with Fetch API
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
         const formData = {
@@ -46,6 +48,10 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("Error updating profile:", error);
             alert("An error occurred while updating.");
         }
+        finally {
+            // Hide Loading Spinner
+            loadingSpinner.classList.add("d-none");
+            btnText.innerText = "Update";
+        }
     });
-    
 });

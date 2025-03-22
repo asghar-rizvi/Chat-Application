@@ -14,6 +14,7 @@ urlpatterns = [
     
 
     path("get_friends/", get_friends, name="get_friends"),
+    path("remove-friend/", remove_friend, name="remove_friend"),
     path("get_friend_requests/", get_friend_requests, name="get_friend_requests"),
     path("handle_request/<int:request_id>/", handle_request, name="handle_request"),
     

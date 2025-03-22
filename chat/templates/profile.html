@@ -6,15 +6,15 @@
 {% endblock %}
 
 {% block content %}
-
-
 <section class="background-radial-gradient d-flex align-items-center justify-content-center vh-100">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <div class="card bg-glass">
+                <div class="card bg-glass animate__animated animate__fadeIn">
                     <div class="card-body p-5">
-                        <h3 class="text-center mb-4" style="text-transform: uppercase;">{{ user.username }}'s Profile</h3>
+                        <!-- Profile Title -->
+                        <h3 class="text-center mb-4 username-text" style="text-transform: capitalize;">{{ user.username }}'s Profile</h3>
+
                         <form id="updateForm">
                             {% if messages %}
                                 <div class="alert-container">
@@ -28,28 +28,31 @@
                             {% endif %}
                             {% csrf_token %}
 
-                            <div class="form-outline mb-4">
-                                <input type="text" id="first_name" class="form-control fw-bold" name="first_name" value= "{{ user.first_name }}" />
-                                <!-- <label class="form-label" for="first_name">First name</label> -->
+                            <!-- Input Fields with Icons -->
+                            <div class="form-group input-group mb-4">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" id="first_name" class="form-control fw-bold" name="first_name" value="{{ user.first_name }}" />
                             </div>
 
-                            <div class="form-outline mb-4">
+                            <div class="form-group input-group mb-4">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
                                 <input type="text" id="last_name" class="form-control fw-bold" name="last_name" value="{{ user.last_name }}" />
-                                <!-- <label class="form-label" for="last_name">Last name</label> -->
                             </div>
 
-                            <div class="form-outline mb-4">
+                            <div class="form-group input-group mb-4">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                                 <input type="email" id="email" name="email" class="form-control fw-bold" value="{{ user.email }}" required />
-                                <!-- <label class="form-label" for="email">Email address</label> -->
                             </div>
 
-                            <div class="form-outline mb-4">
+                            <div class="form-group input-group mb-4">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
                                 <input type="password" id="password" name="password" class="form-control" placeholder="Enter new password (optional)" />
-                                <label class="form-label" for="password">Password</label>
                             </div>
 
+                            <!-- Update Button -->
                             <button type="submit" class="btn btn-primary btn-block w-100 btn-update" disabled>
-                                U p d a t e
+                                <span class="spinner-border spinner-border-sm d-none" id="loadingSpinner"></span>
+                                <span class="btn-text">Update</span>
                             </button>
 
                         </form>
@@ -59,6 +62,7 @@
         </div>
     </div>
 </section>
+
 {% endblock %}
 
 {% block extra_js %}

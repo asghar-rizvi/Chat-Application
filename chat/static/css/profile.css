@@ -1,29 +1,66 @@
+/* Background Gradient */
 .background-radial-gradient {
-    background-color: hsl(218, 41%, 15%);
-    background-image: radial-gradient(650px circle at 0% 0%,
-        hsl(218, 41%, 35%) 15%,
-        hsl(218, 41%, 30%) 35%,
-        hsl(218, 41%, 20%) 75%,
-        hsl(218, 41%, 19%) 80%,
-        transparent 100%),
-      radial-gradient(1250px circle at 100% 100%,
-        hsl(218, 41%, 45%) 15%,
-        hsl(218, 41%, 30%) 35%,
-        hsl(218, 41%, 20%) 75%,
-        hsl(218, 41%, 19%) 80%,
-        transparent 100%);
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+/* Glassmorphism Card */
 .bg-glass {
-    background-color: hsla(0, 0%, 100%, 0.9) !important;
-    backdrop-filter: saturate(200%) blur(25px);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    transition: transform 0.3s ease-in-out;
 }
+
+.bg-glass:hover {
+    transform: scale(1.02);
+}
+
+/* Username Gradient */
+.username-text {
+    background: linear-gradient(45deg, #f39c12, #f1c40f);
+    -webkit-background-clip: text;
+    color: transparent;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Input Fields */
+.input-group-text {
+    background: #f8f9fa;
+    border-right: none;
+}
+
+.form-control {
+    border-left: none;
+    background: rgba(255, 255, 255, 0.7);
+    transition: all 0.3s;
+}
+
+.form-control:focus {
+    background: white;
+    border-color: #007bff;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+}
+
+/* Update Button */
 .btn-update {
     transition: all 0.3s ease-in-out;
     opacity: 0.5;
     cursor: not-allowed;
+    position: relative;
 }
+
 .btn-update.active {
     opacity: 1;
     cursor: pointer;
+}
+
+/* Loading Spinner */
+.spinner-border {
+    margin-right: 5px;
 }

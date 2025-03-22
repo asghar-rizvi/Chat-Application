@@ -7,6 +7,8 @@ from .models import *
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 import json
+from django.db.models import Q
+
 
 def signup(request):
     if request.method == "POST":
@@ -80,9 +82,8 @@ def searchUser(request):
     ).values_list("receiver", flat=True)
 
     # Fetch users excluding self and those in `excluded_users`
-    users = User.objects.exclude(username=request.user.username).exclude(id__in=excluded_users)
-
-
+    users = User.objects.exclude(username=request.user.username).exclude(id__in=excluded_users)[:15]
+    total_users = len(User.objects.exclude(username=request.user.username))
 
     users_list = []
     for user in users:
@@ -93,14 +94,14 @@ def searchUser(request):
             'full_name': f"{user.first_name} {user.last_name}",
             'request_sent': request_sent
         })
-    return render(request, "SearchUser.html", {"users": users_list})
+    return render(request, "SearchUser.html", {"users": users_list, 'totalUsers' : total_users})
 
 
 @login_required
 def searchUserByName(request):
-    query = request.GET.get('q', '') 
-    if query:  
-        users = User.objects.filter(username__icontains=query)[:10] 
+    query = request.GET.get('q', '').strip()  # Trim whitespace
+    if query:
+        users = User.objects.filter(username__icontains=query).exclude(id=request.user.id)[:10]
     else:
         return JsonResponse({'error': 'No user found'}, status=400)  # Proper error response
     
@@ -114,7 +115,7 @@ def searchUserByName(request):
             'request_sent': request_sent
         })
     
-    return JsonResponse(users_list, safe=False) 
+    return JsonResponse(users_list, safe=False)
     
     
 @login_required
@@ -165,6 +166,29 @@ def get_friend_requests(request):
     request_list = [{"id": req.id, "name": req.sender.username} for req in requests]
     
     return JsonResponse(request_list, safe=False)
+
+@login_required
+def remove_friend(request):
+    if request.method == "POST":
+        friend_id = request.POST.get("friend_id")
+        user = request.user
+
+        try:
+            # Find the friendship where user1 and user2 match (friendship is mutual)
+            friendship = Friendship.objects.filter(
+                (Q(user1=user) & Q(user2_id=friend_id)) | (Q(user1_id=friend_id) & Q(user2=user))
+            ).first()
+
+            if friendship:
+                friendship.delete()
+                return JsonResponse({"success": True, "message": "Friend removed successfully."})
+            else:
+                return JsonResponse({"success": False, "message": "Friendship not found."}, status=404)
+
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "message": "Invalid request."}, status=400)
 
 
 @login_required

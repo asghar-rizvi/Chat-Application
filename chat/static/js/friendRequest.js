@@ -21,22 +21,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function loadFriends() {
     console.log('Loading Friends')
-    /*fetch('/get_friends/')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => console.log("Fetched Friends:", data))
-    .catch(error => console.error("Error fetching friends:", error));*/
-
     fetch('/get_friends/')
     .then(response => response.json())
     .then(data => {
         console.log("Fetched Friends:", data);
 
-        // If `data` is an array instead of an object with `friends`
+        // If data is an array instead of an object with friends
         let friends = Array.isArray(data) ? data : data.friends;
 
         if (!friends || !Array.isArray(friends)) {
@@ -46,9 +36,15 @@ function loadFriends() {
         let friendList = document.getElementById("friends-section");
         friendList.innerHTML = '<h4>Your Friends</h4>';
         friends.forEach(friend => {
-            friendList.innerHTML += `<div class="request-item">
+            console.log('Freindds...', friend.name)
+            friendList.innerHTML += 
+            `<div class="friend-item">
                 <span>${friend.name}</span>
+                <div>
+                        <button class="btn btn-danger btn-sm" onclick="RemoveFriend(${friend.id})">Remove</button>
+                </div>
             </div>`;
+            
         });
     })
     .catch(error => console.error("Error fetching friends:", error));
@@ -65,17 +61,18 @@ function loadRequests() {
                 requestList.innerHTML += `<div class="request-item">
                     <span>${request.name}</span>
                     <div>
-                        <button class="btn btn-success btn-sm" onclick="handleRequest(${request.id}, 'accept')">ACCEPT</button>
+                        <button class="btn btn-outline-primary btn-sm active" onclick="handleRequest(${request.id}, 'accept')">ACCEPT</button>
                         <button class="btn btn-danger btn-sm" onclick="handleRequest(${request.id}, 'reject')">REJECT</button>
                     </div>
                 </div>`;
+                
             });
         })
         .catch(error => console.error("Error fetching friend requests:", error));
 }
 
 function handleRequest(requestId, action) {
-    fetch(`/handle_request/${requestId}/`, {
+    fetch(`/handle_request/${requestId}/`,{
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -95,6 +92,28 @@ function handleRequest(requestId, action) {
     .catch(error => console.error("Error processing request:", error));
 }
 
+function RemoveFriend(friendId) {
+    console.log('friend...', friendId)
+    fetch('/remove-friend/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCSRFToken() // Ensure CSRF token is included
+        },
+        body: `friend_id=${friendId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
 
 function getCSRFToken() {
     let csrfToken = null;
@@ -106,5 +125,3 @@ function getCSRFToken() {
     });
     return csrfToken;
 }
-
-loadRequests();
