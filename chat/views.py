@@ -142,15 +142,17 @@ def send_friend_request(request, username):
 @login_required
 def get_friends(request):
     """Returns a list of friends for the logged-in user."""
+    print('get friends')
     user = request.user
     friends = Friendship.objects.filter(user1=user) | Friendship.objects.filter(user2=user)
-
+    print('Inside gET friends')
+    print(friends)
     friend_list = [
         {"id": f.user2.id if f.user1 == user else f.user1.id, 
          "name": f.user2.username if f.user1 == user else f.user1.username}
         for f in friends
     ]
-    
+    print('Friends of the user:...', friend_list)
     return JsonResponse({"friends": friend_list})
 
 
@@ -228,4 +230,32 @@ def get_group_name(request, friend_username):
         return JsonResponse({"error": "User not found"}, status=404)
 
 
+@login_required
+def profile_page(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)  # Parse JSON data
+            request.user.first_name = data.get("first_name", request.user.first_name)
+            request.user.last_name = data.get("last_name", request.user.last_name)
+            request.user.email = data.get("email", request.user.email)
+            if data.get("password"):
+                request.user.set_password(data["password"])
+            request.user.save()
 
+            messages.success(request, "Profile updated successfully!")  # Success message
+
+            return JsonResponse({
+                "message": "Profile updated successfully!",
+                "status": "success",
+                "message_type": "success"
+            })  # ✅ Send message in JSON response
+
+        except Exception as e:
+            messages.error(request, "Error updating profile!")  # Error message
+            return JsonResponse({
+                "message": "Error updating profile!",
+                "status": "error",
+                "message_type": "error"
+            })  # ✅ Send error message in JSON response
+
+    return render(request, "profile.html", {"user": request.user})

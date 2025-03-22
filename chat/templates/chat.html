@@ -11,144 +11,283 @@
         <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
 
         <style>
-            .background-radial-gradient {
-                background-color: hsl(218, 41%, 15%);
-                background-image: radial-gradient(650px circle at 0% 0%,
-                    hsl(218, 41%, 30%) 35%,
-                    hsl(218, 41%, 20%) 75%,
-                    hsl(218, 41%, 19%) 80%,
-                    transparent 100%);
+            body {
+                background: linear-gradient(to right, #141e30, #243b55);
+                color: white;
+                font-family: 'Arial', sans-serif;
             }
-
             .chat-container {
-                height: 90vh;
+                flex-grow: 1;
                 display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                height: calc(100vh - 56px);
+                padding: 10px;
             }
-            
-            /* Sidebar */
             .chat-sidebar {
-                background: #f8f9fa;
+                background: #1f2937;
                 padding: 15px;
-                border-right: 1px solid #ddd;
+                border-right: 2px solid #3b3b3b;
                 overflow-y: auto;
                 height: 100%;
+                transition: 0.3s;
             }
-            
-            /* Friend List */
             .friend-item {
-                padding: 10px;
-                border-radius: 5px;
+                padding: 12px;
+                border-radius: 8px;
                 cursor: pointer;
-                background: white;
-                margin-bottom: 10px;
-                border: 1px solid #ddd;
+                background: #374151;
+                margin-bottom: 12px;
+                transition: all 0.3s ease;
+                color: white;
+                box-shadow: 2px 2px 10px rgba(255, 255, 255, 0.1);
             }
             .friend-item:hover {
-                background: #e9ecef;
+                background: #4b5563;
+                transform: scale(1.05);
             }
-            
-            /* Chat Window */
             .chat-window {
                 display: flex;
                 flex-direction: column;
                 height: 100%;
             }
+            .chat-container {
+                display: flex;
+                flex-direction: column;
+                height: 93vh; /* Adjust height (85% of viewport) */
+                max-height: 100vh; 
+                border-radius: 12px;
+                overflow: hidden; /* Prevents overflow issues */
+            }
             
-            /* Chat Header */
+            /* Keep the header fixed */
             .chat-header {
-                background: #007bff;
-                color: white;
-                padding: 15px;
-                text-align: center;
+                flex-shrink: 0; /* Prevents resizing */
+                position: sticky;
+                top: 0;
+                z-index: 10;
             }
             
-            /* Chat Messages */
+            /* Chat messages area (Scrollable) */
             .chat-messages {
-                flex: 1;
-                overflow-y: auto;
+                flex-grow: 1; /* Takes remaining space */
+                overflow-y: auto; /* Enables scrolling */
                 padding: 15px;
-                background: #f1f1f1;
-                height: 75%;
+                max-height: 90vh; /* Adjusting for header height */
+                scrollbar-width: thin; /* Modern thin scrollbar */
+                scrollbar-color: #007bff transparent; /* Custom scrollbar */
             }
             
-            /* Chat Bubbles */
+            /* Custom Scrollbar (For Webkit browsers) */
+            .chat-messages::-webkit-scrollbar {
+                width: 6px;
+            }
+            .chat-messages::-webkit-scrollbar-thumb {
+                background: #007bff;
+                border-radius: 10px;
+            }
+            .chat-messages::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            
+            /* Add a subtle glass effect */
+            .chat-header::after {
+                content: "";
+                
+                inset: 0;
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border-radius: 12px 12px 12px 12px;
+                z-index: -1;
+            }
+            
+            /* Optional: Add an icon beside the username */
+            #chat-username::before {
+                content: "💬"; /* Chat icon */
+                margin-right: 10px;
+                font-size: 1.2rem;
+                opacity: 0.8;
+            }
+            
             .message {
                 max-width: 60%;
-                padding: 10px 15px;
-                border-radius: 15px;
+                padding: 12px 16px;
+                border-radius: 20px;
                 margin-bottom: 10px;
+                font-size: 1rem;
+                transition: all 0.3s ease-in-out;
+                opacity: 0;
+                animation: fadeIn 0.5s forwards;
+            }
+
+            .messages {
+                flex-grow: 1;
+                overflow-y: auto;
+                border: 1px solid #ccc;
+                padding: 10px;
+                border-radius: 5px;
+                background: #f8f9fa;
             }
             .message.sent {
-                background: #007bff;
+                background: #007bff; /* WhatsApp green */
                 color: white;
                 align-self: flex-end;
+                box-shadow: 2px 4px 10px rgba(0, 255, 0, 0.3);
+                margin-left: auto; /* Moves message to the right */
             }
+        
+            /* Friend's messages (align left, white background) */
             .message.received {
-                background: white;
-                border: 1px solid #ddd;
+                background: #ffffff;
+                color: #222831;
                 align-self: flex-start;
+                box-shadow: 2px 4px 10px rgba(255, 255, 255, 0.3);
             }
-            
-            /* Chat Input */
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
             .chat-input {
                 display: flex;
-                padding: 10px;
-                background: white;
-                border-top: 1px solid #ddd;
+                padding: 15px;
+                background: #1f2937;
+                border-top: 2px solid #3b3b3b;
+                border-radius: 0 0 10px 10px;
             }
             .chat-input input {
                 flex: 1;
                 margin-right: 10px;
+                border-radius: 20px;
+                padding: 10px;
+            }
+            .input-container {
+                display: flex;
+                gap: 10px;
+            }
+            @media (max-width: 768px) {
+                .input-container {
+                    flex-direction: column;
+                }
+            }
+            .message {
+                opacity: 0;
+                transform: scale(0.9);
+                transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+            }
+            
+            .message.show {
+                opacity: 1;
+                transform: scale(1);
+            }
+            /* Gradient Navbar Background */
+            .bg-gradient {
+                background: linear-gradient(135deg, #007bff, #6610f2);
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            }
+
+            /* Navbar Links Styling */
+            .navbar-nav .nav-link {
+                color: white !important;
+                font-weight: 500;
+                transition: all 0.3s ease-in-out;
+            }
+
+            /* Hover Effect */
+            .navbar-nav .nav-link:hover {
+                color: #ffdd57 !important;
+            }
+
+            /* Profile Dropdown Styling */
+            .navbar-nav .dropdown-menu {
+                background-color: #fff;
+                border-radius: 8px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            }
+
+            .navbar-nav .dropdown-menu .dropdown-item {
+                padding: 10px;
+                font-size: 14px;
+                transition: all 0.3s ease-in-out;
+            }
+
+            .navbar-nav .dropdown-menu .dropdown-item:hover {
+                background-color: #007bff;
+                color: white;
             }
 
         </style>
     </head>
-    <body class="background-radial-gradient">
-
-        <nav class="navbar navbar-dark bg-primary">
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-gradient">
             <div class="container-fluid">
-                <a class="navbar-brand">Chat Application</a>
-                <ul class="navbar-nav d-flex flex-row gap-4">
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/chat">Chat</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/network/">Friend Requests</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/searchUser/">Search</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Profile</a>
-                    </li>
-                </ul>
+                <!-- Brand Logo -->
+                <a class="navbar-brand d-flex align-items-center" href="/chat">
+                    <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" width="35" height="35" class="me-2">
+                    <span class="fw-bold">Chat App</span>
+                </a>
+        
+                <!-- Navbar Toggle (For Mobile) -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+        
+                <!-- Navbar Links -->
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                    <ul class="navbar-nav d-flex align-items-center gap-3">
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center gap-1" href="/chat">
+                                <i class="fas fa-comments"></i> Chat
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center gap-1" href="/network/">
+                                <i class="fas fa-user-friends"></i> Friends
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center gap-1" href="/searchUser/">
+                                <i class="fas fa-search"></i> Search
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center gap-1" href="/profile_page/">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                        </li>
+        
+                        <!-- Profile Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="30" height="30" class="rounded-circle">
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="/profile_page/">Profile</a></li>
+                                <li><a class="dropdown-item text-danger" href="/logout/">Logout</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </nav>
-        
         <div class="container-fluid">
             <div class="row chat-container">
-                
-                <!-- Left Sidebar: Friend List -->
                 <div class="col-md-3 chat-sidebar">
-                    <input type="text" id="search-friends" class="form-control mb-2" placeholder="🔍 Search friends...">
-                    <div id="friends-list">
-                        <!-- Friend names will be dynamically loaded here -->
+                    <div class="input-group mb-2">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" id="search-friends" class="form-control" placeholder="Search friends...">
                     </div>
+                    <div id="friends-list"></div>
                 </div>
-        
-                <!-- Right: Chat Window -->
                 <div class="col-md-9 chat-window">
-                    <!-- Chat Header (Friend's Name) -->
                     <div class="chat-header">
                         <h5 id="chat-username">Select a friend to chat</h5>
                     </div>
-        
-                    <!-- Chat Messages Area -->
                     <div id="chat-messages" class="chat-messages">
-                        <!-- Messages will be dynamically loaded here -->
+                        
                     </div>
-        
-                    <!-- Chat Input Box -->
+                    
                     <div class="chat-input">
                         <input type="text" id="message-input" class="form-control" placeholder="Type a message...">
                         <button class="btn btn-primary" id="send-button">Send</button>
@@ -157,14 +296,11 @@
             </div>
         </div>
 
-    {{user|json_script:"user-id"}}
-
-    </body>
     <script>
-    
         document.addEventListener("DOMContentLoaded", function () {
-            loadFriendsList();});
-            user_name = JSON.parse(document.getElementById('user-id').textContent)
+            loadFriendsList();
+
+        });
         function loadFriendsList() {
             fetch('/get_friends/')
                 .then(response => response.json())
@@ -178,32 +314,23 @@
                 })
                 .catch(error => console.error("Error loading friends:", error));
         }
-        
         function fetchGroupName(friendUsername) {
-            if (!friendUsername) {
-                console.error("Friend username is missing!");
-                return;  
-            }
-            console.log(friendUsername)
             fetch(`/get_group_name/${friendUsername}/`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.group_name) {
-                        console.log("Group Name:", data.group_name);
-                        startWebSocket(data.group_name, friendUsername) ;
-                    } else {
-                        console.error("Error fetching group name:", data.error);
+                        startWebSocket(data.group_name, friendUsername);
                     }
                 })
                 .catch(error => console.error("Fetch error:", error));
         }
-        
-        
+
         function startWebSocket(groupName, friendUsername) {
             const usernameElement = document.getElementById("chat-username");
             const chatMesssages = document.getElementById("chat-messages");
             const sendButton = document.getElementById("send-button");
             const messageInput = document.getElementById("message-input");
+            
             console.log('Inside Start WebSocket...', groupName, friendUsername)
             if (!usernameElement || !chatMesssages || !sendButton || !messageInput) {
                 console.error("Chat UI elements not found!");
@@ -227,20 +354,31 @@
                 if (data.type === 'chat_history') {
                     // Clear previous messages
                     chatMesssages.innerHTML = ""; 
-            
-                    // Loop through the chat history and display messages
+                    
                     data.messages.forEach(msg => {
-                        console.log('Inside chat_history:', msg);  
                         let msgElement = document.createElement("div");
-                        msgElement.innerHTML = `<strong>${msg.user}:</strong> ${msg.message}`; 
+                        msgElement.classList.add("message");
+                        msgElement.classList.add(msg.user === "{{ request.user.username }}" ? "sent" : "received");
+                        msgElement.innerHTML = `<strong>${msg.user}:</strong> ${msg.message}`;
+                
                         chatMesssages.appendChild(msgElement);
+                        chatMesssages.scrollTop = chatMesssages.scrollHeight;
+                
+                        // Apply the animation immediately after adding
+                        requestAnimationFrame(() => {
+                            msgElement.classList.add("show");  
+                        });
                     });
-            
+                
                 } else if (data.type === 'chat_message') {
                     console.log('Receiving message:', data);
-            
+                    const isCurrentUser = data.user === "{{ request.user.username }}";
+
                     let msgElement = document.createElement("div");
-                    msgElement.innerHTML = `<strong>${data.user}:</strong> ${data.message}`;  
+                    msgElement.classList.add("message");
+                    msgElement.classList.add(isCurrentUser ? "sent" : "received");
+                    msgElement.innerHTML = `<strong>${data.user}:</strong> ${data.message}`;
+
                     chatMesssages.appendChild(msgElement);
                     chatMesssages.scrollTop = chatMesssages.scrollHeight;
                 }
@@ -259,18 +397,8 @@
                     messageInput.value = "";
                 }
             };
-        
-            function appendMessage(user, message) {
-                let msgElement = document.createElement("div");
-                msgElement.classList.add("message"); 
-                msgElement.innerHTML = `${user}: ${message}`;
-                chatMesssages.appendChild(msgElement);
-                chatMesssages.scrollTop = chatMesssages.scrollHeight;
-            }
+    
         }
-        
     </script>
-
-
+    </body>
 </html>
-

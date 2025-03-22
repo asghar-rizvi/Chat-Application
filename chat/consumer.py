@@ -125,7 +125,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             # Save message to the database
             group_obj = await self.get_group(self.group_name)
-            await self.create_chat_message(username, message, group_obj)
+            await self.create_chat_message(username, message, self.group_name)
 
             # Broadcast message to group
             await self.channel_layer.group_send(
@@ -159,21 +159,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return Group.objects.get_or_create(group_name=group_name)[0]
 
     @database_sync_to_async
-    def create_chat_message(self, username, message, group_obj):
+    def create_chat_message(self, username, message, groupname):
         """Store messages as a dictionary in the database."""
         return ChatMessage.objects.create(
-            message_chats={'user': username, 'message': message},
-            group=group_obj
-        )
+            message_data={'user': username, 'message': message},
+            group_name=groupname
+        ) 
 
     @database_sync_to_async
     def get_chat_history(self, group_name):
         """Retrieve chat history formatted as a list of dictionaries."""
-        group = Group.objects.filter(group_name=group_name).first()
         print('Getting History in function')
-        if group:
-            return [
-                {'user': msg.message_chats['user'], 'message': msg.message_chats['message']}
-                for msg in ChatMessage.objects.filter(group=group)
+        return [
+                {'user': msg.message_data['user'], 'message': msg.message_data['message']}
+                for msg in ChatMessage.objects.filter(group_name=group_name)
             ]
         return []
