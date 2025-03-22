@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 import json
 from django.db.models import Q
+from django.db import transaction
 
 
 def signup(request):
@@ -174,26 +175,50 @@ def get_friend_requests(request):
 
 @login_required
 def remove_friend(request):
-    if request.method == "POST":
-        friend_id = request.POST.get("friend_id")
-        user = request.user
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid request method."}, status=400)
 
-        try:
-            # Find the friendship where user1 and user2 match (friendship is mutual)
+    friend_id = request.POST.get("friend_id")
+    user = request.user
+
+    try:
+        with transaction.atomic():  # Ensure atomicity of the transaction
+            # Ensure the friend exists
+            friend = get_object_or_404(User, id=friend_id)
+
+            # Find the friendship
             friendship = Friendship.objects.filter(
-                (Q(user1=user) & Q(user2_id=friend_id)) | (Q(user1_id=friend_id) & Q(user2=user))
+                (Q(user1=user) & Q(user2=friend)) | (Q(user1=friend) & Q(user2=user))
             ).first()
 
-            if friendship:
-                friendship.delete()
-                return JsonResponse({"success": True, "message": "Friend removed successfully."})
-            else:
+            if not friendship:
                 return JsonResponse({"success": False, "message": "Friendship not found."}, status=404)
 
-        except Exception as e:
-            return JsonResponse({"success": False, "message": str(e)}, status=500)
+            # Delete the friendship record
+            friendship.delete()
 
-    return JsonResponse({"success": False, "message": "Invalid request."}, status=400)
+            # Ensure the group object exists
+            user1, user2 = sorted([user, friend], key=lambda x: x.username)
+            group = Group.objects.filter(user1=user1, user2=user2).first()
+
+            if group:
+                # Delete all chat messages linked to this group
+                ChatMessage.objects.filter(group_name=group.group_name).delete()
+
+                # Delete the group itself
+                group.delete()
+
+            # Delete the friend request record if it exists
+            FriendRequest.objects.filter(
+                (Q(sender=user) & Q(receiver=friend)) | (Q(sender=friend) & Q(receiver=user))
+            ).delete()
+
+            return JsonResponse({"success": True, "message": "Friend removed successfully."})
+
+    except User.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Friend not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
 
 
 @login_required

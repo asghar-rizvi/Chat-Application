@@ -114,7 +114,7 @@
     background: #007bff; /* WhatsApp green */
     color: white;
     align-self: flex-end;
-    box-shadow: 2px 4px 10px rgba(0, 255, 0, 0.3);
+    box-shadow: 2px 4px 10px rgba(255, 255, 255, 0.3);
     margin-left: auto; /* Moves message to the right */
 }
 

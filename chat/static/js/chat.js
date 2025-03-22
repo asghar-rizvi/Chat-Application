@@ -34,6 +34,9 @@ function startWebSocket(groupName, friendUsername) {
     const sendButton = document.getElementById("send-button");
     const messageInput = document.getElementById("message-input");
     const currentUser = document.getElementById("current-user").dataset.username;
+    const userDiv = document.getElementById('current-user');
+    const username = userDiv.getAttribute('data-username');
+    console.log(username);
     console.log('Inside Start WebSocket...', groupName, friendUsername)
     if (!usernameElement || !chatMesssages || !sendButton || !messageInput) {
         console.error("Chat UI elements not found!");
@@ -74,16 +77,24 @@ function startWebSocket(groupName, friendUsername) {
             });
         
         } else if (data.type === 'chat_message') {
-            console.log('Receiving message:', data);
-            const isCurrentUser =  "{{ request.user.username }}";
-            console.log('current user...', isCurrentUser)
             let msgElement = document.createElement("div");
             msgElement.classList.add("message");
-            msgElement.classList.add(currentUser ? "sent" : "received");
-            // msgElement.classList.add(isCurrentUser ? "sent" : "received");
+            console.log('DATA USER: ', data.user)
+            if (data.user === username) {
+                console.log('Matched')
+                msgElement.classList.add("sent"); // Add 'sent' class for messages sent by the current user
+            } else {
+                console.log('Not Matched')
+                msgElement.classList.add("received"); // Add 'received' class for messages from others
+            }
+        
+            // Add the message content to the element
             msgElement.innerHTML = `<strong>${data.user}:</strong> ${data.message}`;
-
+        
+            // Append the message element to the chat container
             chatMesssages.appendChild(msgElement);
+        
+            // Scroll to the bottom of the chat container
             chatMesssages.scrollTop = chatMesssages.scrollHeight;
         }
     };
