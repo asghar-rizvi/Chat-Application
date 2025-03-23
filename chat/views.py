@@ -200,19 +200,17 @@ def remove_friend(request):
             # Ensure the group object exists
             user1, user2 = sorted([user, friend], key=lambda x: x.username)
             group = Group.objects.filter(user1=user1, user2=user2).first()
-
             if group:
                 # Delete all chat messages linked to this group
                 ChatMessage.objects.filter(group_name=group.group_name).delete()
 
                 # Delete the group itself
                 group.delete()
-
             # Delete the friend request record if it exists
             FriendRequest.objects.filter(
                 (Q(sender=user) & Q(receiver=friend)) | (Q(sender=friend) & Q(receiver=user))
             ).delete()
-
+            
             return JsonResponse({"success": True, "message": "Friend removed successfully."})
 
     except User.DoesNotExist:
@@ -220,6 +218,11 @@ def remove_friend(request):
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
 
+@login_required
+def get_friend_request_count(request):
+    # Fetch pending friend requests for the logged-in user
+    count = FriendRequest.objects.filter(receiver=request.user, status='pending').count()
+    return JsonResponse({'count': count})
 
 @login_required
 def handle_request(request, request_id):

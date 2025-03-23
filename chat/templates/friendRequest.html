@@ -9,14 +9,14 @@
         <section class="container d-flex flex-column align-items-center" style="min-height: 100vh;">
             <div class="btn-group mt-4" role="group">
                 <button id="show-friends" class="btn btn-outline-primary active" onclick="toggleView('friends')">FRIENDS</button>
-                <button id="show-requests" class="btn btn-outline-secondary" onclick="toggleView('requests')">FRIEND REQUESTS</button>
+                <button id="show-requests" class="btn btn-outline-secondary" onclick="toggleView('requests')">FRIEND REQUESTS
+                    <span id="request-count"></span>
+                </button>
             </div>
 
             <div id="friends-section" class="mt-4 w-100">
                 <h4 >Your Friends</h4>
-                <div id="friends-list">
-                    
-                </div>
+                <div id="friends-list"></div>
             </div>
 
             <div id="requests-section" class="mt-4 w-100" style="display: none;">

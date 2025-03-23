@@ -17,16 +17,32 @@ function toggleView(section) {
 
 document.addEventListener("DOMContentLoaded", function () {
     loadFriends(); // Load friends list by default
+    updateFriendRequestCount();
 });
+
+function updateFriendRequestCount() {
+    fetch('/get_friend_request_count/')
+        .then(response => response.json())
+        .then(data => {
+            let requestCountElement = document.getElementById('request-count');
+            if (requestCountElement) {
+                if (data.count > 0) {
+                    requestCountElement.classList.add('notification-bubble'); 
+                    requestCountElement.textContent = data.count;
+                } else {
+                    requestCountElement.classList.remove('notification-bubble');
+                }
+            }
+        })
+        .catch(error => console.error('Error fetching friend request count:', error));
+}
 
 function loadFriends() {
     console.log('Loading Friends')
     fetch('/get_friends/')
     .then(response => response.json())
     .then(data => {
-        console.log("Fetched Friends:", data);
 
-        // If data is an array instead of an object with friends
         let friends = Array.isArray(data) ? data : data.friends;
 
         if (!friends || !Array.isArray(friends)) {
@@ -57,6 +73,7 @@ function loadRequests() {
         .then(data => {
             let requestList = document.getElementById("friend-requests");
             requestList.innerHTML = '';
+            console.log(data.length)
             data.forEach(request => {
                 requestList.innerHTML += `<div class="request-item">
                     <span>${request.name}</span>
@@ -84,12 +101,16 @@ function handleRequest(requestId, action) {
     .then(data => {
         if (data.success) {
             loadRequests(); 
+            updateFriendRequestCount();
+            location.reload();
         } else {
             console.log(data)
             alert("Action failed!");
         }
     })
     .catch(error => console.error("Error processing request:", error));
+    
+    
 }
 
 function RemoveFriend(friendId) {
