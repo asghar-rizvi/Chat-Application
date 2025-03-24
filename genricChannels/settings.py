@@ -127,3 +127,31 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "asgharqamberrozvi@gmail.com" 
 EMAIL_HOST_PASSWORD = "ladk bymh gnfy mago" 
+
+
+# SESSIONS
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+    }
+}
+
+SESSION_COOKIE_AGE = 86400  
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  
+SESSION_COOKIE_HTTPONLY = True  
+CSRF_USE_SESSIONS = True  
+
+SESSION_SAVE_EVERY_REQUEST = False  # Keep False unless you need it
+
+# Secure settings (only enable in production)
+import os
+if os.getenv("DJANGO_ENV") == "production":
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+else:
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
