@@ -9,6 +9,8 @@ from django.shortcuts import get_object_or_404
 import json
 from django.db.models import Q
 from django.db import transaction
+from django.contrib.auth import update_session_auth_hash
+
 
 
 def signup(request):
@@ -290,9 +292,6 @@ def get_group_name(request, friend_username):
 @login_required
 def profile_page(request):
     if request.method == "POST":
-        print('hehe')
-        print(request.body)
-
         try:
             data = json.loads(request.body)  
             request.user.first_name = data.get("first_name", request.user.first_name)
@@ -300,10 +299,10 @@ def profile_page(request):
             request.user.email = data.get("email", request.user.email)
             if data.get("password"):
                 request.user.set_password(data["password"])
+                update_session_auth_hash(request, request.user)
             request.user.save()
 
             messages.success(request, "Profile updated successfully!")  
-            print('Data')
             return JsonResponse({
                 "message": "Profile updated successfully!",
                 "status": "success",

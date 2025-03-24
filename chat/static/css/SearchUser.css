@@ -32,3 +32,34 @@
 .input-group-text {
     border-radius: 50px 0 0 50px;
 }
+
+.message-box {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.message-box.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.message-box.alert-success {
+    background-color: #28a745;
+}
+
+.message-box.alert-warning {
+    background-color: #ffc107;
+}
+
+.message-box.alert-danger {
+    background-color: #dc3545;
+}

@@ -14,7 +14,6 @@ function searchUsers() {
     }
 
     if (query === "") {
-        // ✅ If input is empty, reload default users
         fetch("/searchUser/")
             .then(response => response.text()) // Fetch HTML response instead of JSON
             .then(html => {
@@ -105,16 +104,18 @@ function sendFriendRequest(username, button) {
 
 function showMessage(message, status) {
     let messageDiv = document.getElementById("message-box");
-    
+    console.log('inside Showmessage')
     if (!messageDiv) {
         messageDiv = document.createElement("div");
         messageDiv.id = "message-box";
-        messageDiv.className = "alert text-center";
-        document.body.prepend(messageDiv); 
+        messageDiv.className = "message-box";
+        document.body.appendChild(messageDiv);
+        console.log('first if')
     }
 
     messageDiv.textContent = message;
-    messageDiv.classList.remove("alert-success", "alert-warning", "alert-danger");
+    messageDiv.classList.remove("alert-success", "alert-warning", "alert-danger", "show");
+    console.log('first out if')
 
     if (status === "success") {
         messageDiv.classList.add("alert-success");
@@ -124,9 +125,15 @@ function showMessage(message, status) {
         messageDiv.classList.add("alert-danger");
     }
 
-    setTimeout(() => { messageDiv.remove(); }, 3000);
+    // Show the message box
+    messageDiv.classList.add("show");
+    console.log('first animination')
+    // Hide the message box after 3 seconds
+    setTimeout(() => {
+        messageDiv.classList.remove("show");
+        setTimeout(() => { messageDiv.remove(); }, 500); // Wait for the animation to finish
+    }, 3000);
 }
-
 
 function getCSRFToken() {
     let csrfTokenInput = document.querySelector("[name=csrfmiddlewaretoken]");

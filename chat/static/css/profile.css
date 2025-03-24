@@ -22,7 +22,7 @@
 
 /* Username Gradient */
 .username-text {
-    background: linear-gradient(45deg, #f39c12, #f1c40f);
+    background: linear-gradient(45deg, #3498db, #2ecc71);
     -webkit-background-clip: text;
     color: transparent;
     font-weight: bold;
@@ -56,8 +56,18 @@
 }
 
 .btn-update.active {
+    background-color: #007bff !important; /* Force Bootstrap blue */
+    color: white !important;
     opacity: 1;
     cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Ensure Hover Works */
+.btn-update.active:hover {
+    background-color: #eeee !important;  /* Keep the same background color */
+    color: #007bff !important;           /* Keep text color */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 /* Loading Spinner */
