@@ -102,7 +102,6 @@ function handleRequest(requestId, action) {
         if (data.success) {
             loadRequests(); 
             updateFriendRequestCount();
-            location.reload();
         } else {
             console.log(data)
             alert("Action failed!");

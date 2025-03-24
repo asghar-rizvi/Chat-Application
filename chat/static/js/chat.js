@@ -82,10 +82,10 @@ function startWebSocket(groupName, friendUsername) {
             console.log('DATA USER: ', data.user)
             if (data.user === username) {
                 console.log('Matched')
-                msgElement.classList.add("sent"); // Add 'sent' class for messages sent by the current user
+                msgElement.classList.add("sent"); 
             } else {
                 console.log('Not Matched')
-                msgElement.classList.add("received"); // Add 'received' class for messages from others
+                msgElement.classList.add("received"); 
             }
         
             // Add the message content to the element
