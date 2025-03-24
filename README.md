@@ -1,6 +1,6 @@
 # BuzzChat - A Lively and Energetic Chat
 
-![BuzzChat](images/chat.png)
+![BuzzChat](images/BuzzChat.png)
 
 BuzzChat is a **Django-based web application** that provides real-time communication with high-end security, leveraging **WebSockets**, **AJAX (Fetch API)**, and **Django Channels**. It ensures **secure** and **asynchronous** messaging while utilizing **Memurai** (a Redis alternative) for caching and performance optimization.
 
